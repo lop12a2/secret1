@@ -262,44 +262,50 @@
             const vw = window.innerWidth;
             const vh = window.innerHeight;
 
-            // Kích thước ảnh: nhỏ hơn trên mobile
-            const photoSize = Math.round(Math.min(vw, vh) * 0.16);
-            const halfP = photoSize / 2;
+            // Kích thước ảnh tỉ lệ theo chiều nhỏ hơn
+            const ps = Math.round(Math.min(vw, vh) * 0.19);
 
-            // Tâm màn hình
-            const cx = vw / 2;
-            const cy = vh / 2;
+            // 11 vị trí cố định theo % màn hình (cx, cy là % tâm ảnh)
+            // Chia đều: 3 ảnh trên, 2 bên trái, 2 bên phải, 4 ảnh dưới
+            const spots = [
+                // --- HÀNG TRÊN (3 ảnh) ---
+                { cx: 18, cy: 10 },
+                { cx: 50, cy:  7 },
+                { cx: 82, cy: 10 },
 
-            // Bán kính vòng elip bao quanh text (cách text đủ xa)
-            // rx: theo chiều ngang, ry: theo chiều dọc
-            const rx = cx * 0.82;   // 82% nửa chiều rộng
-            const ry = cy * 0.78;   // 78% nửa chiều cao
+                // --- BÊN TRÁI (2 ảnh) ---
+                { cx:  9, cy: 38 },
+                { cx:  9, cy: 62 },
 
-            const total = imageList.length; // 11 ảnh
-            const angleStep = (2 * Math.PI) / total;
-            // Bắt đầu từ góc trên (-90°) để ảnh đầu ở đỉnh
-            const startAngle = -Math.PI / 2;
+                // --- BÊN PHẢI (2 ảnh) ---
+                { cx: 91, cy: 38 },
+                { cx: 91, cy: 62 },
 
-            imageList.forEach((src, i) => {
-                const angle = startAngle + i * angleStep;
+                // --- HÀNG DƯỚI (4 ảnh) ---
+                { cx: 14, cy: 88 },
+                { cx: 38, cy: 91 },
+                { cx: 62, cy: 91 },
+                { cx: 86, cy: 88 },
+            ];
 
-                // Tọa độ trung tâm ảnh trên elip
-                let px = cx + rx * Math.cos(angle);
-                let py = cy + ry * Math.sin(angle);
+            // Xáo ngẫu nhiên thứ tự ảnh (không xáo vị trí để luôn cân đối)
+            const shuffled = [...imageList].sort(() => Math.random() - 0.5);
 
-                // Giữ ảnh trong màn hình (margin 4px)
-                px = Math.max(halfP + 4, Math.min(vw - halfP - 4, px));
-                py = Math.max(halfP + 4, Math.min(vh - halfP - 4, py));
+            shuffled.forEach((src, i) => {
+                const spot = spots[i];
+                // Tính pixel từ %, clamp để ảnh không bị tràn viền
+                const halfP = ps / 2;
+                const px = Math.max(halfP, Math.min(vw - halfP, vw * spot.cx / 100));
+                const py = Math.max(halfP, Math.min(vh - halfP, vh * spot.cy / 100));
 
                 const card = document.createElement('div');
                 card.className = 'photo-card';
-                card.style.width  = photoSize + 'px';
-                card.style.height = photoSize + 'px';
-                // Đặt theo tâm ảnh
-                card.style.left = (px - halfP) + 'px';
-                card.style.top  = (py - halfP) + 'px';
-                card.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
-                card.style.animationDelay = (i * 0.12) + 's';
+                card.style.width  = ps + 'px';
+                card.style.height = ps + 'px';
+                card.style.left   = (px - halfP) + 'px';
+                card.style.top    = (py - halfP) + 'px';
+                card.style.transform = `rotate(${Math.random() * 24 - 12}deg)`;
+                card.style.animationDelay = (i * 0.1) + 's';
 
                 const img = document.createElement('img');
                 img.src = src;
