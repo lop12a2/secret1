@@ -8,15 +8,15 @@
         body {
             margin: 0;
             padding: 0;
+            /* Chống tràn viền an toàn và mượt mà, không gây đơ màn hình */
             overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100%;
+            
             background: linear-gradient(135deg, #4a00e0 0%, #ff0844 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            /* Khóa chặt màn hình để chống lỗi vệt tím thừa bên phải */
-            height: 100vh;
-            width: 100vw;
-            position: fixed; 
-            top: 0; left: 0;
         }
 
         /* --- MÀN HÌNH YÊU CẦU XOAY NGANG --- */
@@ -116,163 +116,4 @@
     <div id="rotate-warning">
         <div class="phone-icon">📱</div>
         <h2>Vui lòng xoay ngang điện thoại<br>để xem món quà này nhé!</h2>
-        <p style="font-size: 0.7em; margin-top: 10px; color: #aaa;">(Nếu đã xoay mà chưa được, hãy tắt khóa xoay màn hình)</p>
-    </div>
-
-    <div id="particles-js"></div>
-
-    <div id="scene-1" class="scene active-scene" onclick="nextScene()">
-        <div class="icon-large">💌</div>
-        <div class="text-box">
-            <h1>Có đôi lời nhắn nhủ...</h1>
-            <p>Dành riêng cho những con người đặc biệt ❤️</p>
-        </div>
-        <div class="hint">(Chạm vào màn hình để tiếp tục)</div>
-    </div>
-
-    <div id="scene-2" class="scene" onclick="nextScene()">
-        <div class="icon-large">🌸</div>
-        <div class="text-box">
-            <h1>Hôm nay là một ngày vô cùng đặc biệt...</h1>
-            <p>Mong mọi điều tốt đẹp nhất dành cho những người tôi yêu thương 🍀🍀🍀</p>
-        </div>
-        <div class="hint">(Chạm tiếp nào)</div>
-    </div>
-
-    <div id="scene-3" class="scene" onclick="nextScene()">
-        <div class="icon-large">💖</div>
-        <div class="text-box">
-            <h1>Chúc mẹ và em gái 8/3 thật vui vẻ!!!</h1>
-            <p>Mẹ và em luôn xinh đẹp, rạng rỡ và luôn nở nụ cười trên môi ạ.</p>
-        </div>
-        <div class="hint">(Chưa hết đâu, chạm tiếp nhé)</div>
-    </div>
-
-    <div id="scene-4" class="scene" onclick="nextScene()">
-        <div class="icon-large">🎁</div>
-        <div class="text-box">
-            <h1>Con có chuẩn bị...</h1>
-            <p>Một bất ngờ nhỏ xíu dành cho Mẹ iu và Em gái.</p>
-        </div>
-        <div class="hint">(Sẵn sàng chưa? Chạm để mở quà!)</div>
-    </div>
-
-    <div id="scene-5" class="scene">
-        <div class="text-box">
-            <h1>HAPPY WOMEN'S DAY!</h1>
-            <p>Mong mẹ và em luôn là những bông hoa tươi thắm nhất! Yêu cả nhà 💕</p>
-        </div>
-        <div id="photo-container"></div>
-    </div>
-
-    <script>
-        function createRainOfFlowers() {
-            const flowerEmojis = ['🌸', '🌹', '🌺', '🌷', '🌼', '🌻'];
-            const flowerCount = 35; 
-            
-            for(let i = 0; i < flowerCount; i++) {
-                let flower = document.createElement('div');
-                flower.className = 'falling-flower';
-                flower.innerText = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
-                
-                flower.style.left = Math.random() * 100 + 'vw';
-                flower.style.animationDuration = (Math.random() * 10 + 8) + 's';
-                flower.style.animationDelay = (Math.random() * 10) + 's';
-                
-                document.body.appendChild(flower);
-            }
-        }
-        createRainOfFlowers(); 
-
-        const imageList = [
-            'anh (1).jpg',
-            'anh (2).jpg',
-            'anh (3).jpg', 
-            'anh (4).jpg',
-            'anh (5).jpg',
-            'anh (6).jpg',
-            'anh (7).jpg',
-            'anh (8).jpg',
-            'anh (9).jpg',
-            'anh (10).jpg',
-            'anh (11).jpg'
-        ];
-
-        let currentScene = 1;
-
-        function nextScene() {
-            if (currentScene >= 5) return; 
-
-            document.getElementById('scene-' + currentScene).classList.remove('active-scene');
-            currentScene++;
-            document.getElementById('scene-' + currentScene).classList.add('active-scene');
-
-            if (currentScene === 5) {
-                scatterPhotos();
-            }
-        }
-
-        function scatterPhotos() {
-            const container = document.getElementById('photo-container');
-            if(imageList.length === 0 || imageList[0] === '') return;
-
-            // ĐÃ SẮP XẾP LẠI 11 TỌA ĐỘ AN TOÀN CHO ĐIỆN THOẠI
-            const safePositions = [
-                // Viền Trái (3 ảnh)
-                { left: 2, top: 5 },
-                { left: 5, top: 40 },
-                { left: 2, top: 65 },
-
-                // Viền Phải (3 ảnh) - Giới hạn max là 75 để ko bị vệt tím
-                { left: 75, top: 5 },
-                { left: 72, top: 40 },
-                { left: 75, top: 65 },
-
-                // Viền Trên (3 ảnh)
-                { left: 25, top: 2 },
-                { left: 45, top: -2 }, 
-                { left: 60, top: 2 },
-
-                // Viền Dưới (2 ảnh)
-                { left: 30, top: 70 },
-                { left: 55, top: 70 } 
-            ];
-
-            safePositions.sort(() => Math.random() - 0.5);
-
-            imageList.forEach((imgSrc, index) => {
-                if (index >= safePositions.length) return; 
-
-                const imgElement = document.createElement('img');
-                imgElement.src = imgSrc;
-                imgElement.className = 'photo-card';
-
-                let randomRot = Math.random() * 50 - 25; 
-
-                imgElement.style.animationDelay = (index * 0.2) + 's'; 
-                
-                imgElement.style.left = safePositions[index].left + 'vw';
-                imgElement.style.top = safePositions[index].top + 'vh';
-                
-                imgElement.style.transform = `rotate(${randomRot}deg)`;
-
-                container.appendChild(imgElement);
-            });
-        }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 50 }, 
-                "color": { "value": ["#ffffff", "#ffccdd", "#ff99cc"] }, 
-                "shape": { "type": "heart" }, 
-                "opacity": { "value": 0.7 },
-                "size": { "value": 6 },
-                "move": { "enable": true, "speed": 1.5, "direction": "top" } 
-            }
-        });
-    </script>
-</body>
-</html>
+        <p style="font-size: 0.7em; margin-top:
