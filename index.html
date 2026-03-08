@@ -12,8 +12,11 @@
             background: linear-gradient(135deg, #4a00e0 0%, #ff0844 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
+            /* Khóa chặt màn hình để chống lỗi vệt tím thừa bên phải */
             height: 100vh;
             width: 100vw;
+            position: fixed; 
+            top: 0; left: 0;
         }
 
         /* --- MÀN HÌNH YÊU CẦU XOAY NGANG --- */
@@ -57,7 +60,7 @@
         .hint { margin-top: 20px; font-size: 0.9em; color: #ffcccc; animation: blink 1.5s infinite; font-style: italic; }
         .icon-large { font-size: 60px; animation: floatIcon 3s ease-in-out infinite; margin-bottom: 15px; }
 
-        /* ẢNH POLAROID */
+        /* ẢNH POLAROID TRÊN MÁY TÍNH */
         .photo-card {
             position: absolute;
             width: 100px; height: 100px;
@@ -68,13 +71,30 @@
         }
         .photo-card:hover { transform: scale(1.5) !important; z-index: 100; box-shadow: 0 0 30px white; }
 
-        /* MƯA HOA RƠI - ĐÃ SỬA LỖI DÍNH MÀN HÌNH */
+        /* MƯA HOA RƠI */
         .falling-flower {
             position: absolute; font-size: 22px;
-            top: -20vh; /* Giấu hẳn hoa lên trên nóc màn hình */
-            opacity: 0; /* Cho tàng hình trong lúc chờ delay */
-            animation: fall linear infinite backwards; /* backwards giúp giữ nguyên trạng thái tàng hình trước khi chạy */
+            top: -20vh;
+            opacity: 0; 
+            animation: fall linear infinite backwards; 
             z-index: 1; pointer-events: none;
+        }
+
+        /* --- THÊM PHẦN NÀY ĐỂ FIX LỖI ĐIỆN THOẠI XOAY NGANG --- */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .text-box { 
+                padding: 10px 20px; 
+                max-width: 75%; 
+            }
+            h1 { font-size: 1.5em; margin-bottom: 5px; } 
+            p { font-size: 1em; }
+            .icon-large { font-size: 40px; margin-bottom: 5px; }
+            
+            /* Thu nhỏ kích thước ảnh để 11 ảnh không đè nhau */
+            .photo-card {
+                width: 60px; height: 60px;
+                padding: 4px 4px 18px 4px;
+            }
         }
 
         /* KEYFRAMES */
@@ -181,14 +201,12 @@
         let currentScene = 1;
 
         function nextScene() {
-            // ĐÃ SỬA LỖI Ở ĐÂY: Dừng lại ở cảnh số 5
             if (currentScene >= 5) return; 
 
             document.getElementById('scene-' + currentScene).classList.remove('active-scene');
             currentScene++;
             document.getElementById('scene-' + currentScene).classList.add('active-scene');
 
-            // ĐÃ SỬA LỖI Ở ĐÂY: Bung 10 bức ảnh ở cảnh số 5
             if (currentScene === 5) {
                 scatterPhotos();
             }
@@ -198,22 +216,26 @@
             const container = document.getElementById('photo-container');
             if(imageList.length === 0 || imageList[0] === '') return;
 
+            // ĐÃ SẮP XẾP LẠI 11 TỌA ĐỘ AN TOÀN CHO ĐIỆN THOẠI
             const safePositions = [
-                { left: 5, top: 10 },   // Góc trên cùng bên trái
-                { left: 20, top: 35 },  // Nửa giữa bên trái
-                { left: 8, top: 60 },   // Góc dưới cùng bên trái
+                // Viền Trái (3 ảnh)
+                { left: 2, top: 5 },
+                { left: 5, top: 40 },
+                { left: 2, top: 65 },
 
-                // Cột bên phải
-                { left: 78, top: 10 },  // Góc trên cùng bên phải
-                { left: 63, top: 30 },  // Nửa giữa bên phải
-                { left: 75, top: 60 },  // Góc dưới cùng bên phải
-                { left: 80, top: 32 },
+                // Viền Phải (3 ảnh) - Giới hạn max là 75 để ko bị vệt tím
+                { left: 75, top: 5 },
+                { left: 72, top: 40 },
+                { left: 75, top: 65 },
 
-                // Hàng rào phía trên và dưới
-                { left: 32, top: 5 },   // Phía trên - lệch trái
-                { left: 52, top: 5 },   // Phía trên - lệch phải
-                { left: 32, top: 65 },  // Phía dưới - lệch trái
-                { left: 52, top: 65 }   // Phía dưới - lệch phải
+                // Viền Trên (3 ảnh)
+                { left: 25, top: 2 },
+                { left: 45, top: -2 }, 
+                { left: 60, top: 2 },
+
+                // Viền Dưới (2 ảnh)
+                { left: 30, top: 70 },
+                { left: 55, top: 70 } 
             ];
 
             safePositions.sort(() => Math.random() - 0.5);
@@ -227,7 +249,7 @@
 
                 let randomRot = Math.random() * 50 - 25; 
 
-                imgElement.style.animationDelay = (index * 0.3) + 's'; 
+                imgElement.style.animationDelay = (index * 0.2) + 's'; 
                 
                 imgElement.style.left = safePositions[index].left + 'vw';
                 imgElement.style.top = safePositions[index].top + 'vh';
