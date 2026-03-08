@@ -2,118 +2,346 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quà Tặng 8/3</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
-            padding: 0;
-            /* Chống tràn viền an toàn và mượt mà, không gây đơ màn hình */
             overflow: hidden;
             width: 100vw;
             height: 100vh;
-            max-width: 100%;
-            
             background: linear-gradient(135deg, #4a00e0 0%, #ff0844 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
         }
 
-        /* --- MÀN HÌNH YÊU CẦU XOAY NGANG --- */
-        #rotate-warning {
-            display: none; 
+        /* Nền lấp lánh */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            top: 0; left: 0;
+        }
+
+        /* Hoa rơi */
+        .falling-flower {
+            position: fixed;
+            font-size: clamp(14px, 2.5vw, 22px);
+            top: -20vh;
+            opacity: 0;
+            animation: fall linear infinite backwards;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Quản lý cảnh */
+        .scene {
             position: fixed;
             top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: #111;
-            z-index: 99999; 
-            color: white;
-            flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; font-size: 1.5em;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 20px;
         }
-        .phone-icon { font-size: 80px; margin-bottom: 20px; animation: rotatePhone 2s infinite ease-in-out; }
-        @media screen and (orientation: portrait) { #rotate-warning { display: flex; } }
-
-        /* Nền lấp lánh */
-        #particles-js { position: absolute; width: 100%; height: 100%; z-index: 0; }
-
-        /* Quản lý Cảnh */
-        .scene {
-            position: absolute; top: 0; left: 0;
-            width: 100vw; height: 100vh; display: none; 
-            flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; text-align: center; cursor: pointer; user-select: none;
+        .active-scene {
+            display: flex;
+            animation: fadeIn 1.5s ease-in-out forwards;
         }
-        .active-scene { display: flex; animation: fadeIn 1.5s ease-in-out forwards; }
 
         .text-box {
             background: rgba(255, 255, 255, 0.15);
-            padding: 20px 40px; border-radius: 20px;
+            padding: clamp(15px, 3vw, 30px) clamp(20px, 5vw, 50px);
+            border-radius: 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
-            backdrop-filter: blur(10px); max-width: 60%; 
-            z-index: 50; 
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            backdrop-filter: blur(10px);
+            max-width: min(600px, 85vw);
+            width: 100%;
+            z-index: 50;
         }
 
-        h1 { font-size: 2.2em; text-shadow: 0 0 10px #ff99cc; margin-bottom: 10px; }
-        p { font-size: 1.2em; line-height: 1.5; margin: 0; }
-        .hint { margin-top: 20px; font-size: 0.9em; color: #ffcccc; animation: blink 1.5s infinite; font-style: italic; }
-        .icon-large { font-size: 60px; animation: floatIcon 3s ease-in-out infinite; margin-bottom: 15px; }
+        h1 {
+            font-size: clamp(1.2em, 3.5vw, 2.2em);
+            text-shadow: 0 0 10px #ff99cc;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        p {
+            font-size: clamp(0.9em, 2vw, 1.2em);
+            line-height: 1.6;
+        }
+        .hint {
+            margin-top: 15px;
+            font-size: clamp(0.75em, 1.5vw, 0.9em);
+            color: #ffcccc;
+            animation: blink 1.5s infinite;
+            font-style: italic;
+        }
+        .icon-large {
+            font-size: clamp(36px, 7vw, 65px);
+            animation: floatIcon 3s ease-in-out infinite;
+            margin-bottom: clamp(8px, 2vh, 18px);
+        }
 
-        /* ẢNH POLAROID TRÊN MÁY TÍNH */
+        /* ===== SCENE 5 - ẢNH LAYOUT ===== */
+        #scene-5 {
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* Khung nội dung scene 5 */
+        #scene-5-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* Text box ở giữa scene 5 */
+        #scene-5 .text-box {
+            position: relative;
+            z-index: 60;
+            pointer-events: auto;
+        }
+
+        /* Ảnh Polaroid - dùng position absolute */
         .photo-card {
             position: absolute;
-            width: 100px; height: 100px;
-            background: white; padding: 6px 6px 25px 6px;
-            border-radius: 5px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            object-fit: cover; transition: transform 0.4s;
-            opacity: 0; animation: popIn 1s forwards; pointer-events: auto;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            overflow: hidden;
+            opacity: 0;
+            animation: popIn 0.6s forwards;
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s;
+            z-index: 55;
         }
-        .photo-card:hover { transform: scale(1.5) !important; z-index: 100; box-shadow: 0 0 30px white; }
-
-        /* MƯA HOA RƠI */
-        .falling-flower {
-            position: absolute; font-size: 22px;
-            top: -20vh;
-            opacity: 0; 
-            animation: fall linear infinite backwards; 
-            z-index: 1; pointer-events: none;
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            /* Phần trắng dưới như polaroid */
+            padding-bottom: 18px;
         }
-
-        /* --- THÊM PHẦN NÀY ĐỂ FIX LỖI ĐIỆN THOẠI XOAY NGANG --- */
-        @media screen and (max-height: 500px) and (orientation: landscape) {
-            .text-box { 
-                padding: 10px 20px; 
-                max-width: 75%; 
-            }
-            h1 { font-size: 1.5em; margin-bottom: 5px; } 
-            p { font-size: 1em; }
-            .icon-large { font-size: 40px; margin-bottom: 5px; }
-            
-            /* Thu nhỏ kích thước ảnh để 11 ảnh không đè nhau */
-            .photo-card {
-                width: 60px; height: 60px;
-                padding: 4px 4px 18px 4px;
-            }
+        .photo-card:hover {
+            transform: scale(1.6) !important;
+            z-index: 200 !important;
+            box-shadow: 0 0 40px rgba(255,255,255,0.9);
         }
 
         /* KEYFRAMES */
-        @keyframes rotatePhone { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(-90deg); } }
-        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        @keyframes popIn { 0% { opacity: 0; transform: scale(0) rotate(-20deg); } 100% { opacity: 1; } }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(25px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0) rotate(-30deg); }
+            70% { transform: scale(1.1); }
+            100% { opacity: 1; }
+        }
         @keyframes fall {
             0% { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
             10% { opacity: 0.8; }
             90% { opacity: 0.8; }
-            100% { transform: translateY(110vh) rotate(360deg) translateX(50px); opacity: 0; }
+            100% { transform: translateY(110vh) rotate(360deg) translateX(40px); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div id="rotate-warning">
-        <div class="phone-icon">📱</div>
-        <h2>Vui lòng xoay ngang điện thoại<br>để xem món quà này nhé!</h2>
-        <p style="font-size: 0.7em; margin-top:
+    <div id="particles-js"></div>
+
+    <!-- SCENE 1 -->
+    <div id="scene-1" class="scene active-scene" onclick="nextScene()">
+        <div class="icon-large">💌</div>
+        <div class="text-box">
+            <h1>Có đôi lời nhắn nhủ...</h1>
+            <p>Dành riêng cho những con người đặc biệt ❤️</p>
+        </div>
+        <div class="hint">(Chạm vào màn hình để tiếp tục)</div>
+    </div>
+
+    <!-- SCENE 2 -->
+    <div id="scene-2" class="scene" onclick="nextScene()">
+        <div class="icon-large">🌸</div>
+        <div class="text-box">
+            <h1>Hôm nay là một ngày vô cùng đặc biệt...</h1>
+            <p>Mong mọi điều tốt đẹp nhất dành cho những người tôi yêu thương 🍀🍀🍀</p>
+        </div>
+        <div class="hint">(Chạm tiếp nào)</div>
+    </div>
+
+    <!-- SCENE 3 -->
+    <div id="scene-3" class="scene" onclick="nextScene()">
+        <div class="icon-large">💖</div>
+        <div class="text-box">
+            <h1>Chúc mẹ và em gái 8/3 thật vui vẻ!!!</h1>
+            <p>Mẹ và em luôn xinh đẹp, rạng rỡ và luôn nở nụ cười trên môi ạ.</p>
+        </div>
+        <div class="hint">(Chưa hết đâu, chạm tiếp nhé)</div>
+    </div>
+
+    <!-- SCENE 4 -->
+    <div id="scene-4" class="scene" onclick="nextScene()">
+        <div class="icon-large">🎁</div>
+        <div class="text-box">
+            <h1>Con có chuẩn bị...</h1>
+            <p>Một bất ngờ nhỏ xíu dành cho Mẹ iu và Em gái.</p>
+        </div>
+        <div class="hint">(Sẵn sàng chưa? Chạm để mở quà!)</div>
+    </div>
+
+    <!-- SCENE 5 -->
+    <div id="scene-5" class="scene">
+        <div id="scene-5-inner">
+            <div class="text-box" style="pointer-events:none;">
+                <h1>HAPPY WOMEN'S DAY! 💐</h1>
+                <p>Mong mẹ và em luôn là những bông hoa tươi thắm nhất!<br>Yêu cả nhà 💕</p>
+            </div>
+            <div id="photo-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Hoa rơi
+        function createRainOfFlowers() {
+            const emojis = ['🌸','🌹','🌺','🌷','🌼','🌻'];
+            for (let i = 0; i < 30; i++) {
+                const el = document.createElement('div');
+                el.className = 'falling-flower';
+                el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                el.style.left = (Math.random() * 100) + 'vw';
+                el.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                el.style.animationDelay = (Math.random() * 12) + 's';
+                document.body.appendChild(el);
+            }
+        }
+        createRainOfFlowers();
+
+        const imageList = [
+            'anh (1).jpg','anh (2).jpg','anh (3).jpg','anh (4).jpg',
+            'anh (5).jpg','anh (6).jpg','anh (7).jpg','anh (8).jpg',
+            'anh (9).jpg','anh (10).jpg','anh (11).jpg'
+        ];
+
+        let currentScene = 1;
+
+        function nextScene() {
+            if (currentScene >= 5) return;
+            document.getElementById('scene-' + currentScene).classList.remove('active-scene');
+            currentScene++;
+            document.getElementById('scene-' + currentScene).classList.add('active-scene');
+            if (currentScene === 5) scatterPhotos();
+        }
+
+        function scatterPhotos() {
+            const container = document.getElementById('photo-container');
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            // Kích thước ảnh theo màn hình
+            const photoSize = Math.max(60, Math.min(100, vw * 0.09));
+
+            // Vùng an toàn trung tâm (text box): tránh chồng lên
+            // Text box ~min(600,85vw) wide, ~auto height ~120px
+            const safeCX = vw / 2;
+            const safeCY = vh / 2;
+            const safeW = Math.min(600, vw * 0.85) / 2 + 20;
+            const safeH = 90;
+
+            // Tạo 11 vị trí bao quanh viền
+            // Phân bổ đều: top, bottom, left, right
+            const positions = [
+                // Góc & viền trên
+                { x: vw * 0.04,  y: vh * 0.04 },
+                { x: vw * 0.20,  y: vh * 0.04 },
+                { x: vw * 0.40,  y: vh * 0.03 },
+                { x: vw * 0.60,  y: vh * 0.03 },
+                { x: vw * 0.80,  y: vh * 0.04 },
+                // Viền trái & phải giữa
+                { x: vw * 0.02,  y: vh * 0.42 },
+                { x: vw * 0.84,  y: vh * 0.42 },
+                // Viền dưới
+                { x: vw * 0.08,  y: vh * 0.78 },
+                { x: vw * 0.30,  y: vh * 0.82 },
+                { x: vw * 0.55,  y: vh * 0.82 },
+                { x: vw * 0.76,  y: vh * 0.78 },
+            ];
+
+            // Xáo vị trí
+            positions.sort(() => Math.random() - 0.5);
+
+            imageList.forEach((src, i) => {
+                if (i >= positions.length) return;
+                const { x, y } = positions[i];
+
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.style.width  = photoSize + 'px';
+                card.style.height = photoSize + 'px';
+                card.style.left   = x + 'px';
+                card.style.top    = y + 'px';
+                card.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
+                card.style.animationDelay = (i * 0.15) + 's';
+
+                const img = document.createElement('img');
+                img.src = src;
+                img.style.width  = '100%';
+                img.style.height = (photoSize - 16) + 'px';
+                img.style.objectFit = 'cover';
+                img.style.display = 'block';
+
+                card.appendChild(img);
+                container.appendChild(card);
+            });
+        }
+
+        // Cập nhật lại ảnh khi đổi kích thước màn hình (xoay điện thoại)
+        window.addEventListener('resize', () => {
+            if (currentScene === 5) {
+                const container = document.getElementById('photo-container');
+                container.innerHTML = '';
+                scatterPhotos();
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            particles: {
+                number: { value: 45 },
+                color: { value: ["#ffffff", "#ffccdd", "#ff99cc"] },
+                shape: { type: "heart" },
+                opacity: { value: 0.7 },
+                size: { value: 5 },
+                move: { enable: true, speed: 1.5, direction: "top" }
+            }
+        });
+    </script>
+</body>
+</html>
