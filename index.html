@@ -262,48 +262,50 @@
             const vw = window.innerWidth;
             const vh = window.innerHeight;
 
-            // Kích thước ảnh tỉ lệ theo chiều nhỏ hơn
+            // Kích thước ảnh
             const ps = Math.round(Math.min(vw, vh) * 0.19);
+            const m = ps / 2 + 4; // margin tối thiểu từ viền = nửa ảnh + 4px
 
-            // 11 vị trí cố định theo % màn hình (cx, cy là % tâm ảnh)
-            // Chia đều: 3 ảnh trên, 2 bên trái, 2 bên phải, 4 ảnh dưới
+            // Vị trí tính bằng pixel thực, tâm ảnh luôn nằm trong [m, vw-m] x [m, vh-m]
+            const L  = m - ps * 0.3;  // cột trái (sát viền trái hơn)
+            const R  = vw - m;      // cột phải
+            const CX = vw / 2;      // cột giữa
+            const T  = m;           // hàng trên
+            const B  = vh - m;      // hàng dưới
+            const M1 = vh * 0.38;   // giữa trên
+            const M2 = vh * 0.62;   // giữa dưới
+            const TC = vh * 0.12;   // gần trên
+            const BC = vh * 0.88;   // gần dưới
+
             const spots = [
-                // --- HÀNG TRÊN (3 ảnh) ---
-                { cx: 18, cy: 10 },
-                { cx: 50, cy:  7 },
-                { cx: 82, cy: 10 },
-
-                // --- BÊN TRÁI (2 ảnh) ---
-                { cx:  9, cy: 38 },
-                { cx:  9, cy: 62 },
-
-                // --- BÊN PHẢI (2 ảnh) ---
-                { cx: 91, cy: 38 },
-                { cx: 91, cy: 62 },
-
-                // --- HÀNG DƯỚI (4 ảnh) ---
-                { cx: 14, cy: 88 },
-                { cx: 38, cy: 91 },
-                { cx: 62, cy: 91 },
-                { cx: 86, cy: 88 },
+                // HÀNG TRÊN (3 ảnh)
+                { px: vw*0.18, py: TC },
+                { px: CX,      py: T  },
+                { px: vw*0.82, py: TC },
+                // BÊN TRÁI (2 ảnh)
+                { px: L,  py: M1 },
+                { px: L,  py: M2 },
+                // BÊN PHẢI (2 ảnh)
+                { px: R,  py: M1 },
+                { px: R,  py: M2 },
+                // HÀNG DƯỚI (4 ảnh)
+                { px: vw*0.15, py: BC },
+                { px: vw*0.38, py: B  },
+                { px: vw*0.62, py: B  },
+                { px: vw*0.85, py: BC },
             ];
 
-            // Xáo ngẫu nhiên thứ tự ảnh (không xáo vị trí để luôn cân đối)
             const shuffled = [...imageList].sort(() => Math.random() - 0.5);
 
             shuffled.forEach((src, i) => {
-                const spot = spots[i];
-                // Tính pixel từ %, clamp để ảnh không bị tràn viền
-                const halfP = ps / 2;
-                const px = Math.max(halfP, Math.min(vw - halfP, vw * spot.cx / 100));
-                const py = Math.max(halfP, Math.min(vh - halfP, vh * spot.cy / 100));
+                const { px, py } = spots[i];
 
                 const card = document.createElement('div');
                 card.className = 'photo-card';
                 card.style.width  = ps + 'px';
                 card.style.height = ps + 'px';
-                card.style.left   = (px - halfP) + 'px';
-                card.style.top    = (py - halfP) + 'px';
+                card.style.left   = (px - ps/2) + 'px';
+                card.style.top    = (py - ps/2) + 'px';
                 card.style.transform = `rotate(${Math.random() * 24 - 12}deg)`;
                 card.style.animationDelay = (i * 0.1) + 's';
 
