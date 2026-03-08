@@ -19,8 +19,8 @@
         /* Nền lấp lánh */
         #particles-js {
             position: fixed;
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important; vertical-align: top;
             z-index: 0;
             top: 0; left: 0;
         }
@@ -65,7 +65,7 @@
             box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
             backdrop-filter: blur(10px);
             max-width: min(600px, 85vw);
-            width: 100%;
+            width: 100% !important;
             z-index: 50;
         }
 
@@ -102,8 +102,8 @@
         /* Khung nội dung scene 5 */
         #scene-5-inner {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important; vertical-align: top;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -117,27 +117,26 @@
             pointer-events: auto;
         }
 
-        /* Ảnh Polaroid - dùng position absolute */
+        /* Ảnh - position absolute */
         .photo-card {
             position: absolute;
-            background: white;
-            border-radius: 4px;
+            background: transparent !important;
+            padding: 0 !important; line-height: 0; font-size: 0;
+            border-radius: 8px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.5);
             overflow: hidden;
             opacity: 0;
             animation: popIn 0.6s forwards;
             pointer-events: auto;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             z-index: 55;
         }
         .photo-card img {
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important; vertical-align: top;
             object-fit: cover;
             display: block;
-            /* Phần trắng dưới như polaroid */
-            padding-bottom: 18px;
         }
         .photo-card:hover {
             transform: scale(1.6) !important;
@@ -263,57 +262,48 @@
             const vw = window.innerWidth;
             const vh = window.innerHeight;
 
-            // Kích thước ảnh theo màn hình
-            const photoSize = Math.max(60, Math.min(100, vw * 0.09));
+            // Kích thước ảnh: nhỏ hơn trên mobile
+            const photoSize = Math.round(Math.min(vw, vh) * 0.16);
+            const halfP = photoSize / 2;
 
-            // Vùng an toàn trung tâm (text box): tránh chồng lên
-            // Text box ~min(600,85vw) wide, ~auto height ~120px
-            const safeCX = vw / 2;
-            const safeCY = vh / 2;
-            const safeW = Math.min(600, vw * 0.85) / 2 + 20;
-            const safeH = 90;
+            // Tâm màn hình
+            const cx = vw / 2;
+            const cy = vh / 2;
 
-            // Tạo 11 vị trí bao quanh viền
-            // Phân bổ đều: top, bottom, left, right
-            const positions = [
-                // Góc & viền trên
-                { x: vw * 0.04,  y: vh * 0.04 },
-                { x: vw * 0.20,  y: vh * 0.04 },
-                { x: vw * 0.40,  y: vh * 0.03 },
-                { x: vw * 0.60,  y: vh * 0.03 },
-                { x: vw * 0.80,  y: vh * 0.04 },
-                // Viền trái & phải giữa
-                { x: vw * 0.02,  y: vh * 0.42 },
-                { x: vw * 0.84,  y: vh * 0.42 },
-                // Viền dưới
-                { x: vw * 0.08,  y: vh * 0.78 },
-                { x: vw * 0.30,  y: vh * 0.82 },
-                { x: vw * 0.55,  y: vh * 0.82 },
-                { x: vw * 0.76,  y: vh * 0.78 },
-            ];
+            // Bán kính vòng elip bao quanh text (cách text đủ xa)
+            // rx: theo chiều ngang, ry: theo chiều dọc
+            const rx = cx * 0.82;   // 82% nửa chiều rộng
+            const ry = cy * 0.78;   // 78% nửa chiều cao
 
-            // Xáo vị trí
-            positions.sort(() => Math.random() - 0.5);
+            const total = imageList.length; // 11 ảnh
+            const angleStep = (2 * Math.PI) / total;
+            // Bắt đầu từ góc trên (-90°) để ảnh đầu ở đỉnh
+            const startAngle = -Math.PI / 2;
 
             imageList.forEach((src, i) => {
-                if (i >= positions.length) return;
-                const { x, y } = positions[i];
+                const angle = startAngle + i * angleStep;
+
+                // Tọa độ trung tâm ảnh trên elip
+                let px = cx + rx * Math.cos(angle);
+                let py = cy + ry * Math.sin(angle);
+
+                // Giữ ảnh trong màn hình (margin 4px)
+                px = Math.max(halfP + 4, Math.min(vw - halfP - 4, px));
+                py = Math.max(halfP + 4, Math.min(vh - halfP - 4, py));
 
                 const card = document.createElement('div');
                 card.className = 'photo-card';
                 card.style.width  = photoSize + 'px';
                 card.style.height = photoSize + 'px';
-                card.style.left   = x + 'px';
-                card.style.top    = y + 'px';
-                card.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
-                card.style.animationDelay = (i * 0.15) + 's';
+                // Đặt theo tâm ảnh
+                card.style.left = (px - halfP) + 'px';
+                card.style.top  = (py - halfP) + 'px';
+                card.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
+                card.style.animationDelay = (i * 0.12) + 's';
 
                 const img = document.createElement('img');
                 img.src = src;
-                img.style.width  = '100%';
-                img.style.height = (photoSize - 16) + 'px';
-                img.style.objectFit = 'cover';
-                img.style.display = 'block';
+                img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
 
                 card.appendChild(img);
                 container.appendChild(card);
