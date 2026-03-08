@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quà Tặng 8/3</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #4a00e0 0%, #ff0844 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- MÀN HÌNH YÊU CẦU XOAY NGANG --- */
+        #rotate-warning {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #111;
+            z-index: 99999; 
+            color: white;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; font-size: 1.5em;
+        }
+        .phone-icon { font-size: 80px; margin-bottom: 20px; animation: rotatePhone 2s infinite ease-in-out; }
+        @media screen and (orientation: portrait) { #rotate-warning { display: flex; } }
+
+        /* Nền lấp lánh */
+        #particles-js { position: absolute; width: 100%; height: 100%; z-index: 0; }
+
+        /* Quản lý Cảnh */
+        .scene {
+            position: absolute; top: 0; left: 0;
+            width: 100vw; height: 100vh; display: none; 
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; text-align: center; cursor: pointer; user-select: none;
+        }
+        .active-scene { display: flex; animation: fadeIn 1.5s ease-in-out forwards; }
+
+        .text-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px 40px; border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+            backdrop-filter: blur(10px); max-width: 60%; 
+            z-index: 50; 
+        }
+
+        h1 { font-size: 2.2em; text-shadow: 0 0 10px #ff99cc; margin-bottom: 10px; }
+        p { font-size: 1.2em; line-height: 1.5; margin: 0; }
+        .hint { margin-top: 20px; font-size: 0.9em; color: #ffcccc; animation: blink 1.5s infinite; font-style: italic; }
+        .icon-large { font-size: 60px; animation: floatIcon 3s ease-in-out infinite; margin-bottom: 15px; }
+
+        /* ẢNH POLAROID */
+        .photo-card {
+            position: absolute;
+            width: 100px; height: 100px;
+            background: white; padding: 6px 6px 25px 6px;
+            border-radius: 5px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            object-fit: cover; transition: transform 0.4s;
+            opacity: 0; animation: popIn 1s forwards; pointer-events: auto;
+        }
+        .photo-card:hover { transform: scale(1.5) !important; z-index: 100; box-shadow: 0 0 30px white; }
+
+        /* MƯA HOA RƠI - ĐÃ SỬA LỖI DÍNH MÀN HÌNH */
+        .falling-flower {
+            position: absolute; font-size: 22px;
+            top: -20vh; /* Giấu hẳn hoa lên trên nóc màn hình */
+            opacity: 0; /* Cho tàng hình trong lúc chờ delay */
+            animation: fall linear infinite backwards; /* backwards giúp giữ nguyên trạng thái tàng hình trước khi chạy */
+            z-index: 1; pointer-events: none;
+        }
+
+        /* KEYFRAMES */
+        @keyframes rotatePhone { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(-90deg); } }
+        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0) rotate(-20deg); } 100% { opacity: 1; } }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg) translateX(50px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="rotate-warning">
+        <div class="phone-icon">📱</div>
+        <h2>Vui lòng xoay ngang điện thoại<br>để xem món quà này nhé!</h2>
+        <p style="font-size: 0.7em; margin-top: 10px; color: #aaa;">(Nếu đã xoay mà chưa được, hãy tắt khóa xoay màn hình)</p>
+    </div>
+
+    <div id="particles-js"></div>
+
+    <div id="scene-1" class="scene active-scene" onclick="nextScene()">
+        <div class="icon-large">💌</div>
+        <div class="text-box">
+            <h1>Có đôi lời nhắn nhủ...</h1>
+            <p>Dành riêng cho những con người đặc biệt ❤️</p>
+        </div>
+        <div class="hint">(Chạm vào màn hình để tiếp tục)</div>
+    </div>
+
+    <div id="scene-2" class="scene" onclick="nextScene()">
+        <div class="icon-large">🌸</div>
+        <div class="text-box">
+            <h1>Hôm nay là một ngày vô cùng đặc biệt...</h1>
+            <p>Mong mọi điều tốt đẹp nhất dành cho những người tôi yêu thương 🍀🍀🍀</p>
+        </div>
+        <div class="hint">(Chạm tiếp nào)</div>
+    </div>
+
+    <div id="scene-3" class="scene" onclick="nextScene()">
+        <div class="icon-large">💖</div>
+        <div class="text-box">
+            <h1>Chúc mẹ và em gái 8/3 thật vui vẻ!!!</h1>
+            <p>Mẹ và em luôn xinh đẹp, rạng rỡ và luôn nở nụ cười trên môi ạ.</p>
+        </div>
+        <div class="hint">(Chưa hết đâu, chạm tiếp nhé)</div>
+    </div>
+
+    <div id="scene-4" class="scene" onclick="nextScene()">
+        <div class="icon-large">🎁</div>
+        <div class="text-box">
+            <h1>Con có chuẩn bị...</h1>
+            <p>Một bất ngờ nhỏ xíu dành cho Mẹ iu và Em gái.</p>
+        </div>
+        <div class="hint">(Sẵn sàng chưa? Chạm để mở quà!)</div>
+    </div>
+
+    <div id="scene-5" class="scene">
+        <div class="text-box">
+            <h1>HAPPY WOMEN'S DAY!</h1>
+            <p>Mong mẹ và em luôn là những bông hoa tươi thắm nhất! Yêu cả nhà 💕</p>
+        </div>
+        <div id="photo-container"></div>
+    </div>
+
+    <script>
+        function createRainOfFlowers() {
+            const flowerEmojis = ['🌸', '🌹', '🌺', '🌷', '🌼', '🌻'];
+            const flowerCount = 35; 
+            
+            for(let i = 0; i < flowerCount; i++) {
+                let flower = document.createElement('div');
+                flower.className = 'falling-flower';
+                flower.innerText = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+                
+                flower.style.left = Math.random() * 100 + 'vw';
+                flower.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                flower.style.animationDelay = (Math.random() * 10) + 's';
+                
+                document.body.appendChild(flower);
+            }
+        }
+        createRainOfFlowers(); 
+
+        const imageList = [
+            'anh (1).jpg',
+            'anh (2).jpg',
+            'anh (3).jpg', 
+            'anh (4).jpg',
+            'anh (5).jpg',
+            'anh (6).jpg',
+            'anh (7).jpg',
+            'anh (8).jpg',
+            'anh (9).jpg',
+            'anh (10).jpg',
+            'anh (11).jpg'
+        ];
+
+        let currentScene = 1;
+
+        function nextScene() {
+            // ĐÃ SỬA LỖI Ở ĐÂY: Dừng lại ở cảnh số 5
+            if (currentScene >= 5) return; 
+
+            document.getElementById('scene-' + currentScene).classList.remove('active-scene');
+            currentScene++;
+            document.getElementById('scene-' + currentScene).classList.add('active-scene');
+
+            // ĐÃ SỬA LỖI Ở ĐÂY: Bung 10 bức ảnh ở cảnh số 5
+            if (currentScene === 5) {
+                scatterPhotos();
+            }
+        }
+
+        function scatterPhotos() {
+            const container = document.getElementById('photo-container');
+            if(imageList.length === 0 || imageList[0] === '') return;
+
+            const safePositions = [
+                { left: 5, top: 10 },   // Góc trên cùng bên trái
+                { left: 20, top: 35 },  // Nửa giữa bên trái
+                { left: 8, top: 60 },   // Góc dưới cùng bên trái
+
+                // Cột bên phải
+                { left: 78, top: 10 },  // Góc trên cùng bên phải
+                { left: 63, top: 30 },  // Nửa giữa bên phải
+                { left: 75, top: 60 },  // Góc dưới cùng bên phải
+                { left: 80, top: 32 },
+
+                // Hàng rào phía trên và dưới
+                { left: 32, top: 5 },   // Phía trên - lệch trái
+                { left: 52, top: 5 },   // Phía trên - lệch phải
+                { left: 32, top: 65 },  // Phía dưới - lệch trái
+                { left: 52, top: 65 }   // Phía dưới - lệch phải
+            ];
+
+            safePositions.sort(() => Math.random() - 0.5);
+
+            imageList.forEach((imgSrc, index) => {
+                if (index >= safePositions.length) return; 
+
+                const imgElement = document.createElement('img');
+                imgElement.src = imgSrc;
+                imgElement.className = 'photo-card';
+
+                let randomRot = Math.random() * 50 - 25; 
+
+                imgElement.style.animationDelay = (index * 0.3) + 's'; 
+                
+                imgElement.style.left = safePositions[index].left + 'vw';
+                imgElement.style.top = safePositions[index].top + 'vh';
+                
+                imgElement.style.transform = `rotate(${randomRot}deg)`;
+
+                container.appendChild(imgElement);
+            });
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 50 }, 
+                "color": { "value": ["#ffffff", "#ffccdd", "#ff99cc"] }, 
+                "shape": { "type": "heart" }, 
+                "opacity": { "value": 0.7 },
+                "size": { "value": 6 },
+                "move": { "enable": true, "speed": 1.5, "direction": "top" } 
+            }
+        });
+    </script>
+</body>
+</html>
